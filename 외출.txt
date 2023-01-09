@@ -1,0 +1,69 @@
+채팅을 시작하면 가볍게 인사를 한 뒤에 
+
+공지 사항으로 프로필 작성한 내용을 물어보면서 대화 내용 주제를 만들어준다 / 프로필 작성한 내용을 토대로 다른 주제를 만들어서 질문을 하며 사용자들에게 대화 주제를 던져준다.
+
+
+ex)
+입장)
+1. 인사
+->
+2. 선호하는 나이를 연하/동갑/연상으로 하셨는데 그 이유는 무엇인가요 ?
+-> 
+3. 선호하는 캠퍼스 ...
+~
+마지막으로 자유롭게 대화를 나눠 주세요 
+
+
+/ 공지사항으로 공지시 채팅창을 막을까? /
+/ 작성 시간은 어느정도로 할까 ? /
+/ 작성 후 잠깐 서로 얘기를 하게 냅두는 게 좋을까 ? /
+
+
+상대방을 소개할 때 mbti , 철학을 좋아하는 과학자처럼 관심 있거나 좋아하는 걸 앞에 보여주고 mbti나 꿈등을 종합해서 마지막에 철학자, 수학자처럼 내가 지정해줘서 정하는 무언가를 주면서 사람마다
+다 다르게 하는데 겹치더라도 상세보기를 통해 더 많은 정보를 얻을 수 있으니까 상관없을 거 같다.
+
+DATABASES
+
+1. 테이블 이름 : signup 
+   내용 : CREATE TABLE signup(
+num INT(11) NOT NULL AUTO_INCREMENT,
+name TEXT NOT NULL,
+id TEXT NOT NULL,
+password TEXT NULL,
+PRIMARY KEY(num)
+);
+
+2. 테이블 이름 : profile
+   내용 : CREATE TABLE profile(
+usernum INT(11) NOT NULL AUTO_INCREMENT,
+userid TEXT NOT NULL,
+age TEXT NOT NULL,
+campus TEXT NOT NULL,
+ideal TEXT NOT NULL,
+idealfrist TEXT NOT NULL,
+idealsecond TEXT NOT NULL,
+idealthird TEXT NOT NULL,
+mbti TEXT NOT NULL,
+mbtifrist TEXT NOT NULL,
+mbtisecond TEXT NOT NULL,
+mbtithird TEXT NOT NULL,
+introduce TEXT NOT NULL,
+meeting TEXT NOT NULL,
+movie TEXT NOT NULL,
+interests TEXT NOT NULL,
+youtube TEXT NULL,
+PRIMARY KEY(usernum)
+);
+
+
+
+
+
+
+
+
+
+///////////////////////
+로그인을 했을 때 db 값으로 session을 정해준다
+profile을  love 부분과 friend , group 등 여러개로 나눈다. ex) Loveprofile, Friendprofile ... 등 
+로그인을 했을 때 Loveprofile 테이블에 userid 값과 로그인 아이디 값이 같으면 session에 useloveprofile = true 를 준다
