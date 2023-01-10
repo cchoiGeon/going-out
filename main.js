@@ -42,10 +42,12 @@ function logintrue(req,res){
     loginbutton = '';
     logoutbutton = `<li><hr class="dropdown-divider" /></li>
     <li><a class="dropdown-item" href="/logout_process">로그아웃</a></li>`;
+    return false;
   }else{
     loginbutton = `<li><a class="dropdown-item" href="/login">로그인</a></li>
       <li><a class="dropdown-item" href="/register">회원가입</a></li>`;
     logoutbutton = ''
+    return false;
   }
 }
 
@@ -67,30 +69,34 @@ server.get("/fristpage", (req, res) => {
 
 // 홈
 server.get("/", (req, res) => {
+  logintrue(req,res)
   db.query('SELECT * FROM profile',function(err,profile){
-    logintrue(req,res)
-    res.send(overlap.repeat(repeatcss,indexbody(3),``,repeatscript,loginbutton,logoutbutton));
+    if(profile.length){
+      man = profile.length;
+    }else{
+      man = 0;
+    }
+    res.send(overlap.repeat(repeatcss,indexbody(man),``,repeatscript,loginbutton,logoutbutton));
 })
 }); // 바디 설정하기
 
 
 // 프로필 설정 
 server.get("/profileFriend", (req, res) => {
-  logintrue(req,res)
+  
   res.send(overlap.repeat(repeatcss,profilebody.Friend,profilescript,repeatscript,loginbutton,logoutbutton));
 });
 server.post("/profileFriend_process",(req, res) => { 
   res.send();
 });
 server.get("/profileGroup", (req, res) => {
-  logintrue(req,res)
+  
   res.send(overlap.repeat(repeatcss,profilebody.Group,profilescript,repeatscript,loginbutton,logoutbutton));
 });
 server.post("/profileGroup_process",(req, res) => { 
   res.send();
 });
 server.get("/profileLove", (req, res) => {
-  logintrue(req,res)
   if(req.session.useprofilelove){
     var yes = '재신청'
   }else{
@@ -112,6 +118,7 @@ server.post("/profileLove_process",(req, res) => {
   ,[req.session.userid,post.older,post.campus,post.idealtype,post.fristtype,post.secondtype,post.thirdtype,post.mbti, post.fristPrefermbti,post.secondPrefermbti,post.thirdPrefermbti,post.selfIntroduction,post.selfMeeting,post.movie,post.interests,post.youtube]
   ,function(err,result){
     res.redirect('/');
+    
   })
 }
 });
@@ -120,7 +127,6 @@ server.post("/profileLove_process",(req, res) => {
 
 // 내 프로필 보기
 server.get("/myprofile", (req, res) => {
-  logintrue(req,res)
   db.query('SELECT * FROM profile',function(err,profile){
     for(var i = 0; i < profile.length; i++){
       if(profile[i].userid === req.session.userid){
@@ -137,11 +143,10 @@ server.get("/myprofile", (req, res) => {
 
 // 매칭
 server.get("/matchingLove", (req, res) => {
-  logintrue(req,res)
   res.send(overlap.repeat(repeatcss,matching.Love,``,repeatscript,loginbutton,logoutbutton));
 });
 server.get("/matchingLove_profile",(req,res) => {
-  logintrue(req,res)
+
   db.query('SELECT * FROM profile',function(err,profile){
     for(var i = 0; i < profile.length; i++){
       if(profile[i].userid === req.session.userid){
@@ -202,10 +207,10 @@ server.post("/login_process",(req,res) =>{
         req.session.userpassword = result[i].password;
         req.session.username = result[i].name;
         req.session.login = true;
-        if(profile[i].userid === result[i].id){
-          req.session.useprofilelove = true;
-        }
         req.session.save(function(){
+        if(profile[i].userid === result[i].id){ // 여기서 오류 떠서 걸리는데 이유를 모르겠음 
+          req.session.useprofilelove = true;
+        }  
         res.redirect('/');
         });
         return false;
