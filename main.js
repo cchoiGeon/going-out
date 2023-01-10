@@ -97,30 +97,45 @@ server.post("/profileGroup_process",(req, res) => {
   res.send();
 });
 server.get("/profileLove", (req, res) => {
-  if(req.session.useprofilelove){
-    var yes = '재신청'
-  }else{
-    var yes = '신청완료'
-  }
-  res.send(overlap.repeat(repeatcss,profilebody.Love(yes),profilescript,repeatscript,loginbutton,logoutbutton));
+  db.query('SELECT * FROM signup',function(err3,register){ 
+    for(let i=0; i<register.length; i++){
+      if(register[i].id === req.session.userid){
+        if(register[i].profilelove === "사용중"){
+          var yes = '재신청'
+          res.send(overlap.repeat(repeatcss,profilebody.Love(yes),profilescript,repeatscript,loginbutton,logoutbutton));
+        }else{
+          var yes = '신청완료'
+          res.send(overlap.repeat(repeatcss,profilebody.Love(yes),profilescript,repeatscript,loginbutton,logoutbutton));
+        }
+      }return false;
+    }
+  });
 });
 server.post("/profileLove_process",(req, res) => { 
   var post = req.body
-  if(req.session.useprofilelove){
-    db.query('UPDATE profile SET age=?,campus=?,ideal=?,idealfrist=?,idealsecond=?,idealthird=?,mbti=?,mbtifrist=?,mbtisecond=?,mbtithird=?,introduce=?,meeting=?,movie=?,interests=?,youtube=? WHERE userid=?',
-    [post.older,post.campus,post.idealtype,post.fristtype,post.secondtype,post.thirdtype,post.mbti, post.fristPrefermbti,post.secondPrefermbti,post.thirdPrefermbti,post.selfIntroduction,post.selfMeeting,post.movie,post.interests,post.youtube,req.session.userid],
-    function(err,result){
-      res.redirect('/');
-    })
-    return false;
-  }else{
-  db.query('INSERT INTO profile(userid,age,campus,ideal,idealfrist,idealsecond,idealthird,mbti,mbtifrist,mbtisecond,mbtithird,introduce,meeting,movie,interests,youtube) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
-  ,[req.session.userid,post.older,post.campus,post.idealtype,post.fristtype,post.secondtype,post.thirdtype,post.mbti, post.fristPrefermbti,post.secondPrefermbti,post.thirdPrefermbti,post.selfIntroduction,post.selfMeeting,post.movie,post.interests,post.youtube]
-  ,function(err,result){
-    res.redirect('/');
-    
-  })
-}
+  db.query('SELECT * FROM signup',function(err3,register){ 
+    for(let i=0; i<register.length; i++){
+      if(register[i].id === req.session.userid){
+        if(register[i].profilelove === "사용중"){
+          db.query('UPDATE profile SET age=?,campus=?,ideal=?,idealfrist=?,idealsecond=?,idealthird=?,mbti=?,mbtifrist=?,mbtisecond=?,mbtithird=?,introduce=?,meeting=?,movie=?,interests=?,youtube=? WHERE userid=?',
+          [post.older,post.campus,post.idealtype,post.fristtype,post.secondtype,post.thirdtype,post.mbti, post.fristPrefermbti,post.secondPrefermbti,post.thirdPrefermbti,post.selfIntroduction,post.selfMeeting,post.movie,post.interests,post.youtube,req.session.userid],
+          function(err,result){
+            res.redirect('/myprofile');
+            return false;
+          });
+        }else{
+          db.query('INSERT INTO profile(userid,age,campus,ideal,idealfrist,idealsecond,idealthird,mbti,mbtifrist,mbtisecond,mbtithird,introduce,meeting,movie,interests,youtube) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
+          ,[req.session.userid,post.older,post.campus,post.idealtype,post.fristtype,post.secondtype,post.thirdtype,post.mbti, post.fristPrefermbti,post.secondPrefermbti,post.thirdPrefermbti,post.selfIntroduction,post.selfMeeting,post.movie,post.interests,post.youtube]
+          ,function(err2,result){
+            db.query('UPDATE signup SET profilelove=?',['사용중'],function(err4,result2){
+              res.redirect('/myprofile');
+              return false;
+            });
+          });
+        }
+      }
+    }
+  });
 });
 
 
@@ -133,6 +148,8 @@ server.get("/myprofile", (req, res) => {
         res.send(myprofile.index(repeatcss,myprofilecss,myprofile.div(profile[i].age,profile[i].campus,profile[i].ideal,profile[i].idealfrist,
           profile[i].idealsecond,profile[i].idealthird,profile[i].mbti,profile[i].mbtifrist,profile[i].mbtisecond,profile[i].mbtithird,profile[i].introduce,
           profile[i].meeting,profile[i].movie,profile[i].interests,profile[i].youtube,req.session.userid),'',repeatscript,loginbutton,logoutbutton));
+      }else{
+        res.redirect('/profileLove');
       }
       return false;
     }
@@ -177,6 +194,14 @@ server.post("/register_process",(req,res) =>{
       if(result[i].id === post.id){
         console.log('사용 중인 아이디입니다')
         res.redirect('/register');
+      }else{
+        if(post.password === post.checkpassword){
+          db.query('INSERT INTO signup(name,id,password) VALUES(?,?,?)',[post.name, post.id,post.password],function(err2,result2){
+            res.redirect('/login');
+          });
+        }else{
+          res.redirect('/register');
+        }
       }
       return false;
     }
@@ -208,9 +233,6 @@ server.post("/login_process",(req,res) =>{
         req.session.username = result[i].name;
         req.session.login = true;
         req.session.save(function(){
-        if(profile[i].userid === result[i].id){ // 여기서 오류 떠서 걸리는데 이유를 모르겠음 
-          req.session.useprofilelove = true;
-        }  
         res.redirect('/');
         });
         return false;
